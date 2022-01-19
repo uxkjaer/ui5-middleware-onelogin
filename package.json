@@ -12,6 +12,9 @@
     "OPENUI5",
     "Fiori"
   ],
+  "repository": {
+    "url": "https://github.com/uxkjaer/ui5-middleware-onelogin.git"
+  },
   "author": "Jakob Kjaer",
   "license": "MIT",
   "dependencies": {
