@@ -22,7 +22,9 @@
     "cookie": "^0.4.1",
     "dotenv": "^12.0.3",
     "playwright": "^1.17.2",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "sleep-promise": "^9.1.0"
+
   },
   "devDependencies": {
     "@playwright/test": "^1.17.2",
@@ -34,8 +36,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.2.0",
-    "prettier": "2.5.1",
-    "sleep-promise": "^9.1.0"
+    "prettier": "2.5.1"
   },
   "husky": {
     "hooks": {
