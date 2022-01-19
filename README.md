@@ -2,10 +2,12 @@
 
 Middleware for [ui5-server](https://github.com/SAP/ui5-server), enabling a generic login support.
 
-The middleware will on first request try to login with the provided credentials and save the cookie for further requests. This uses playwright in a headless mode to run the login process. 
+The middleware will on first request try to login with the provided credentials and save the cookie for further requests. This uses playwright in a headless mode to run the login process.
 The first request will take longer.
 
 This has been tested with Azure AD, Google, OpenAM and the SAP Gateway login pages.
+
+Merge requests with other login handlers are more than welcome via pull request.
 
 ## Install
 
@@ -16,9 +18,10 @@ npm install ui5-middleware-onelogin --save-dev
 ## Configuration options (in `$yourapp/ui5.yaml`)
 
 Currently the following environment variables are used
-UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL
-UI5_MIDDLEWARE_ONELOGIN_USERNAME
-UI5_MIDDLEWARE_ONELOGIN_PASSWORD
+
+- UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL
+- UI5_MIDDLEWARE_ONELOGIN_USERNAME
+- UI5_MIDDLEWARE_ONELOGIN_PASSWORD
 
 Use of environment variables or values set in a `.env` file will be used.
 
@@ -51,10 +54,9 @@ server:
     - name: ui5-middleware-onelogin
       afterMiddleware: compression
       configuration:
-        path: webapp
-
+        debug: true / false (true will open up the playwright browser so you can see what's going on)
 ```
 
-
 ## License
+
 MIT

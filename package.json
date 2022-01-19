@@ -1,8 +1,8 @@
 {
   "name": "ui5-middleware-onelogin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A universal login provider for UI5 tooling",
-  "main": "/index.js",
+  "main": "/lib/index.js",
   "scripts": {
     "test": "npx playwright test"
   },
@@ -24,7 +24,6 @@
     "playwright": "^1.17.2",
     "tough-cookie": "^4.0.0",
     "sleep-promise": "^9.1.0"
-
   },
   "devDependencies": {
     "@playwright/test": "^1.17.2",

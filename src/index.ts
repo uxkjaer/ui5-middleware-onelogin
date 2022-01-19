@@ -1,7 +1,7 @@
+import { serialize } from 'cookie';
+import dotenv from 'dotenv';
 import cookieGetter from './cookieGetter';
 const log = require('@ui5/logger').getLogger('server:custommiddleware:onelogin');
-import dotenv from 'dotenv';
-import { serialize } from 'cookie';
 dotenv.config();
 
 // interface cookieFace {
@@ -27,17 +27,16 @@ dotenv.config();
  *                                                      if given in ui5.yaml
  * @returns {function} Middleware function to use
  */
-// eslint-disable-next-line func-names
-module.exports = function ({}) {
+//@ts-ignore
+module.exports = function ({ _resources, options }) {
   // eslint-disable-next-line func-names
   return async function (req: any, res: any, next: any) {
     let cookies = [];
     if (!process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL) {
       next();
     } else if (!process.env.cookie) {
-      // else {
       log.info('Fetching cookie, hang on!');
-      const cookieObj = await new cookieGetter().getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL);
+      const cookieObj = await new cookieGetter().getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL, options);
       cookies = JSON.parse(cookieObj);
       process.env.cookie = cookieObj;
     } else {
@@ -49,7 +48,6 @@ module.exports = function ({}) {
     cookies
       .filter((cookieTemp: any) => !cookieTemp.name.includes('sap-contextid'))
       .forEach((cookie: any) => {
-        //  cookie.domain = req.hostname
         cookie.key = cookie.name;
         delete cookie.expires;
         res.cookie(cookie.name, cookie.value, {
@@ -57,10 +55,15 @@ module.exports = function ({}) {
           httpOnly: true, // http only, prevents JavaScript cookie access
           secure: false, // cookie must be sent over https / ssl)
         });
-        cookieStr = cookieStr.concat(cookieStr, serialize(cookie.name, cookie.value, cookie), '; ');
+        cookieStr = cookieStr.concat(
+          serialize(cookie.name, cookie.value, { ...cookie, encode: (value) => value }),
+          '; '
+        );
       });
+    if (options.configuration.debug) {
+      log.info(`Parsed cookie is ${cookieStr}`);
+    }
     req.headers.cookie = cookieStr;
-
 
     next();
   };
