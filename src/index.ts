@@ -1,8 +1,6 @@
 import cookieGetter from './cookieGetter';
-const log = require("@ui5/logger").getLogger(
-  "server:custommiddleware:onelogin"
-);
-import dotenv from "dotenv";
+const log = require('@ui5/logger').getLogger('server:custommiddleware:onelogin');
+import dotenv from 'dotenv';
 import { serialize } from 'cookie';
 dotenv.config();
 
@@ -30,44 +28,50 @@ dotenv.config();
  * @returns {function} Middleware function to use
  */
 // eslint-disable-next-line func-names
-module.exports = function ({ }) {
-
+module.exports = function ({}) {
   // eslint-disable-next-line func-names
-  return async function (req : any, res: any, next: any) {
-    let cookies = []; 
-    if (!process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL){
-      next()
-    }
-    else if (!process.env.cookie){
-      log.info('Fetching cookie, hang on!')
-      const cookieStr = await  new cookieGetter().getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL)
-      cookies = JSON.parse(cookieStr)
-      process.env.cookie = cookieStr
-      
-    }
-    else {
-      cookies = JSON.parse(process.env.cookie)
+  return async function (_req: any, res: any, next: any) {
+    let cookies = [];
+    if (!process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL) {
+      next();
+    } else if (!process.env.cookie) {
+      // else {
+      log.info('Fetching cookie, hang on!');
+      const cookieObj = await new cookieGetter().getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL);
+      cookies = JSON.parse(cookieObj);
+      process.env.cookie = cookieObj;
+    } else {
+      cookies = JSON.parse(process.env.cookie);
     }
 
-    let cookieStr : string = ''
-    cookies.forEach((cookie: any) => {
-       cookie.domain = req.hostname
-       cookie.key = cookie.name
-       res.cookie(cookie.name, cookie.value, { maxAge: -1 })
-       delete cookie.expires
-       cookieStr = cookieStr.concat(cookieStr, serialize(cookie.name, cookie.value, cookie), "; ")
-    })
-       
-      
-      
-    
-    let parsedUI5Headers = (process.env.UI5_MIDDLEWARE_HTTP_HEADERS) ? JSON.parse(process.env.UI5_MIDDLEWARE_HTTP_HEADERS): {}
-    
-    parsedUI5Headers = Object.assign(parsedUI5Headers, { 'cookie' : cookieStr })
+    let cookieStr: string = '';
 
-    process.env.UI5_MIDDLEWARE_HTTP_HEADERS = JSON.stringify(parsedUI5Headers)
+    cookies
+      .filter((cookieTemp: any) => !cookieTemp.name.includes('sap-contextid'))
+      .forEach((cookie: any) => {
+        //  cookie.domain = req.hostname
+        cookie.key = cookie.name;
+        delete cookie.expires;
+        res.cookie(cookie.name, cookie.value, {
+          maxAge: 86400 * 1000, // 24 hours
+          httpOnly: true, // http only, prevents JavaScript cookie access
+          secure: false, // cookie must be sent over https / ssl)
+        });
+        if (!process.env.UI5_MIDDLEWARE_HTTP_HEADERS) {
+          cookieStr = cookieStr.concat(cookieStr, serialize(cookie.name, cookie.value, cookie), '; ');
+        }
+      });
+
+    if (!process.env.UI5_MIDDLEWARE_HTTP_HEADERS) {
+      let parsedUI5Headers = process.env.UI5_MIDDLEWARE_HTTP_HEADERS
+        ? JSON.parse(process.env.UI5_MIDDLEWARE_HTTP_HEADERS)
+        : {};
+
+      parsedUI5Headers = Object.assign(parsedUI5Headers, { cookie: cookieStr });
+
+      process.env.UI5_MIDDLEWARE_HTTP_HEADERS = JSON.stringify(parsedUI5Headers);
+    }
 
     next();
-    
   };
 };
