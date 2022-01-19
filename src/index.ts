@@ -30,7 +30,7 @@ dotenv.config();
 // eslint-disable-next-line func-names
 module.exports = function ({}) {
   // eslint-disable-next-line func-names
-  return async function (_req: any, res: any, next: any) {
+  return async function (req: any, res: any, next: any) {
     let cookies = [];
     if (!process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL) {
       next();
@@ -57,20 +57,10 @@ module.exports = function ({}) {
           httpOnly: true, // http only, prevents JavaScript cookie access
           secure: false, // cookie must be sent over https / ssl)
         });
-        if (!process.env.UI5_MIDDLEWARE_HTTP_HEADERS) {
-          cookieStr = cookieStr.concat(cookieStr, serialize(cookie.name, cookie.value, cookie), '; ');
-        }
+        cookieStr = cookieStr.concat(cookieStr, serialize(cookie.name, cookie.value, cookie), '; ');
       });
+    req.headers.cookie = cookieStr;
 
-    if (!process.env.UI5_MIDDLEWARE_HTTP_HEADERS) {
-      let parsedUI5Headers = process.env.UI5_MIDDLEWARE_HTTP_HEADERS
-        ? JSON.parse(process.env.UI5_MIDDLEWARE_HTTP_HEADERS)
-        : {};
-
-      parsedUI5Headers = Object.assign(parsedUI5Headers, { cookie: cookieStr });
-
-      process.env.UI5_MIDDLEWARE_HTTP_HEADERS = JSON.stringify(parsedUI5Headers);
-    }
 
     next();
   };
