@@ -1,6 +1,6 @@
 {
   "name": "ui5-middleware-onelogin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A universal login provider for UI5 tooling",
   "main": "/index.js",
   "scripts": {
