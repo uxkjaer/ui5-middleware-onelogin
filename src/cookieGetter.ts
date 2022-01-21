@@ -1,10 +1,13 @@
 import { chromium } from 'playwright';
 import sleep from 'sleep-promise';
+import {Options} from "./types";
 
 export default class CookieGetter {
-  async getCookie(url: string, options: any): Promise<string> {
-    const isDebug = options.configuration.debug ? true : false;
-    const browser = await chromium.launch({ headless: isDebug ? true : false, args: ['--disable-dev-shm-usage'] });
+  async getCookie(url: string, options: Options): Promise<string> {
+    const browser = await chromium.launch({
+      headless: !options.configuration.debug,
+      args: ['--disable-dev-shm-usage']
+    });
     const context = await browser.newContext({ ignoreHTTPSErrors: true });
 
     const page = await context.newPage();

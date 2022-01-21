@@ -1,6 +1,7 @@
 import { serialize } from 'cookie';
 import dotenv from 'dotenv';
 import cookieGetter from './cookieGetter';
+import {Options} from "./types";
 const log = require('@ui5/logger').getLogger('server:custommiddleware:onelogin');
 dotenv.config();
 
@@ -27,8 +28,7 @@ dotenv.config();
  *                                                      if given in ui5.yaml
  * @returns {function} Middleware function to use
  */
-//@ts-ignore
-module.exports = function ({ _resources, options }) {
+module.exports = function ({ options }: {options: Options}) {
   // eslint-disable-next-line func-names
   return async function (req: any, res: any, next: any) {
     let cookies = [];
