@@ -36,7 +36,7 @@ module.exports = function ({ options }: {options: Options}) {
       next();
     } else if (!process.env.cookie) {
       log.info('Fetching cookie, hang on!');
-      const cookieObj = await new cookieGetter().getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL, options);
+      const cookieObj = await new cookieGetter().getCookie(options);
       cookies = JSON.parse(cookieObj);
       process.env.cookie = cookieObj;
     } else {

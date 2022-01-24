@@ -2,37 +2,43 @@ import { chromium } from 'playwright';
 import sleep from 'sleep-promise';
 import {Options} from "./types";
 
+
+interface Attributes {
+  url: string
+  username: string,
+  password: string
+}
 export default class CookieGetter {
-  async getCookie(url: string, options: Options): Promise<string> {
+  async getCookie(options: Options): Promise<string> {
+    const attr : Attributes = {
+      url: (options.configuration && options.configuration.path) ? options.configuration.path : process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL!,
+      username: (options.configuration && options.configuration.username) ? options.configuration.username : process.env.UI5_MIDDLEWARE_ONELOGIN_USERNAME!,
+      password: (options.configuration && options.configuration.password) ? options.configuration.password : process.env.UI5_MIDDLEWARE_ONELOGIN_PASSWORD!,
+    }
     const browser = await chromium.launch({
-      headless: !options.configuration.debug,
+      headless: (options) ? !options.configuration.debug : true,
       args: ['--disable-dev-shm-usage']
     });
     const context = await browser.newContext({ ignoreHTTPSErrors: true });
 
     const page = await context.newPage();
 
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-    const elem = await Promise.race([
-      page.waitForSelector('input[type="email"]'),
-      page.waitForSelector('input[type="username"]'),
-      page.waitForSelector('input[type="text"]'),
-    ]);
-    const type = await elem.getAttribute('type');
+    await page.goto(attr.url, { waitUntil: 'domcontentloaded' });
+    let elem;
+    try{
+       elem = await Promise.race([
+        page.waitForSelector('input[type="email"]'),
+        page.waitForSelector('input[type="username"]'),
+        page.waitForSelector('input[name="sap-user"]')
+      ]);
+    }
+    catch (oError) {
+      elem = await page.waitForSelector('input[type="text"]')
+    }
+    
     let password = page.locator('input[type="password"]');
     let isHidden = await password.getAttribute('aria-hidden');
-    switch (type) {
-      case 'email':
-        await page.type('input[type="email"]', process.env.UI5_MIDDLEWARE_ONELOGIN_USERNAME!);
-        break;
-      case 'username':
-        await page.type('input[type="username"]', process.env.UI5_MIDDLEWARE_ONELOGIN_USERNAME!);
-        break;
-      case 'text':
-        await page.type('input[type="text"]', process.env.UI5_MIDDLEWARE_ONELOGIN_USERNAME!);
-        break;
-    }
+    await elem.type(attr.username);
     if (!!isHidden && isHidden !== null) {
       try {
         await page.click('input[type="submit"]', { timeout: 500 });
@@ -43,11 +49,12 @@ export default class CookieGetter {
           page.waitForSelector('text="Submit"'),
           page.waitForSelector('text="Yes"'),
           page.waitForSelector('text="Login"'),
-          page.waitForSelector('text="Yes"'),
+          page.waitForSelector('text="Yes"')
         ]);
         //@ts-ignore
 
         await buttonLocator.click({ waitUntil: 'networkidle' });
+        await sleep(1000)
       }
     }
     while (!!isHidden) {
@@ -55,7 +62,7 @@ export default class CookieGetter {
 
       isHidden = await password.getAttribute('aria-hidden');
     }
-    await password.type(process.env.UI5_MIDDLEWARE_ONELOGIN_PASSWORD!);
+    await password.type(attr.password);
     try {
       await page.waitForSelector('*[type="submit"]', { timeout: 500 });
       //@ts-ignore
@@ -65,8 +72,7 @@ export default class CookieGetter {
         page.waitForSelector('text="Next"'),
         page.waitForSelector('text="Submit"'),
         page.waitForSelector('text="Yes"'),
-        page.waitForSelector('text="Login"'),
-        page.waitForSelector('text="Yes"'),
+        page.waitForSelector('//*[@id="LOGON_BUTTON"]')
       ]);
       //@ts-ignore
 

@@ -13,11 +13,15 @@ Merge requests with other login handlers are more than welcome via pull request.
 
 ```bash
 npm install ui5-middleware-onelogin --save-dev
+
+npx install 
 ```
 
 ## Configuration options (in `$yourapp/ui5.yaml`)
 
-Currently the following environment variables are used
+Currently you cna define the properties in the configuration (see below) or the following environment variables are used.
+
+It is strongly recommended to use the .env file and add that to your .gitignore file.
 
 - UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL
 - UI5_MIDDLEWARE_ONELOGIN_USERNAME
@@ -54,6 +58,9 @@ server:
     - name: ui5-middleware-onelogin
       afterMiddleware: compression
       configuration:
+        path: <Login URL>
+        username: <Login User>
+        password: <Login Password>
         debug: true / false (true will open up the playwright browser so you can see what's going on)
 ```
 

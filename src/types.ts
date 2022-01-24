@@ -1,6 +1,8 @@
 export interface Options {
     configuration: {
-        path: string
+        path?: string
+        username?: string,
+        password?: string,
         debug?: boolean
     }
 }

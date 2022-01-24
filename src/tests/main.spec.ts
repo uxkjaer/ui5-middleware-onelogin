@@ -1,16 +1,24 @@
 import test, { expect } from '@playwright/test';
 import CookieGetter from '../cookieGetter';
 import dotenv from 'dotenv';
+import {Options} from "../types";
+
 dotenv.config();
 
-const getCookie = async (url: string, endUrl?: string) => {
-  const cookieStr = await new CookieGetter().getCookie(url, endUrl);
+const getCookie = async (url: string) => {
+  const options : Options = {
+    configuration: {
+      debug: true
+    }
+  }
+  const cookieStr = await new CookieGetter().getCookie(options);
   return cookieStr;
 };
 
 test('Login to SapDevCenter', async () => {
+  
   const cookieStr: any = await getCookie(process.env.UI5_MIDDLEWARE_ONELOGIN_LOGIN_URL);
-  expect(JSON.parse(cookieStr).find((cookie: any) => cookie.name === 'MYSAPSSO2')).toBeDefined();
+  expect(JSON.parse(cookieStr).filter(function(oCookie: any){ return oCookie.name === 'MYSAPSSO2'})[0]).toBeDefined()
 });
 
 test('Login to AzureAD', async () => {
