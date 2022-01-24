@@ -14,7 +14,6 @@ Merge requests with other login handlers are more than welcome via pull request.
 ```bash
 npm install ui5-middleware-onelogin --save-dev
 
-npx install 
 ```
 
 ## Configuration options (in `$yourapp/ui5.yaml`)
